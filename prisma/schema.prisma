@@ -1,0 +1,35 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  passwordHash String
+  role         String        @default("USER") // "USER" or "ADMIN"
+  createdAt    DateTime      @default(now())
+  scans        ScanHistory[]
+}
+
+model ScanHistory {
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brandName         String
+  manufacturer      String
+  category          String
+  activeIngredients String   // Store as JSON string: {name: string, strength: string}[]
+  genericName       String?
+  genericPrice      Float?
+  brandPrice        Float?
+  savingsAmount     Float?
+  savingsPercent    Int?
+  safetyExplanation String   // Store as JSON string: multilingual explanations
+  createdAt         DateTime @default(now())
+}
