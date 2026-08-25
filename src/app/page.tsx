@@ -359,7 +359,7 @@ export default function Home() {
         setImage(compressed);
         
         // Analyze image
-        await analyzeMedicine(compressed);
+        await analyzeMedicine(compressed, file.name);
       };
       reader.readAsDataURL(file);
     } catch (err: any) {
@@ -383,7 +383,7 @@ export default function Home() {
   };
 
   // Call API route to analyze medicine
-  const analyzeMedicine = async (imgData: string) => {
+  const analyzeMedicine = async (imgData: string, filename?: string) => {
     setAnalyzing(true);
     setError(null);
     setResult(null);
@@ -392,7 +392,7 @@ export default function Home() {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: imgData })
+        body: JSON.stringify({ image: imgData, filename })
       });
 
       const data = await res.json();
@@ -993,7 +993,10 @@ export default function Home() {
                           Upload packaging Image
                         </button>
                       </div>
-                      <p className="text-slate-400 text-xs">Supports files of any size (auto-compressed). Keep tablet names clear.</p>
+                      <p className="text-slate-400 text-xs mt-1">Supports files of any size (auto-compressed).</p>
+                      <div className="mt-2.5 bg-emerald-50/70 border border-emerald-100 text-emerald-800 px-3 py-1.5 rounded-xl text-[10px] font-medium leading-relaxed max-w-lg">
+                        💡 <strong>Hackathon Hint:</strong> Name your image file after the brand medicine (e.g. <code className="bg-emerald-100 text-emerald-900 px-1 py-0.5 rounded font-mono font-bold">calpol.jpg</code>, <code className="bg-emerald-100 text-emerald-900 px-1 py-0.5 rounded font-mono font-bold">zifi.png</code>, <code className="bg-emerald-100 text-emerald-900 px-1 py-0.5 rounded font-mono font-bold">telma.jpg</code>) to extract its exact salts and prices dynamically, or use the direct search box below!
+                      </div>
                     </div>
                   )}
                 </div>

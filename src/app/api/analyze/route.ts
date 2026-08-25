@@ -176,7 +176,7 @@ function generateGenericSafetyExplanation(medicine: any) {
 
 export async function POST(request: Request) {
   try {
-    const { image, text } = await request.json();
+    const { image, text, filename } = await request.json();
 
     // Simulate standard AI API latency (1.2 seconds)
     await new Promise((resolve) => setTimeout(resolve, 1200));
@@ -237,12 +237,58 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Image data or text query is required" }, { status: 400 });
     }
 
-    let targetKey = "mock_augmentin"; // Default fallback
+    let targetKey = "";
 
+    // Check if the base64 content specifies a mock template directly
     if (typeof image === "string" && image.startsWith("mock_")) {
       targetKey = image;
-    } else {
-      // For any custom uploads, we mock-analyze by randomly selecting one of our three core datasets.
+    } else if (filename && typeof filename === "string") {
+      const normalizedFn = filename.toLowerCase();
+
+      // Check if filename contains references to our primary templates
+      if (normalizedFn.includes("augmentin") || normalizedFn.includes("amoxicillin") || normalizedFn.includes("clavulan")) {
+        targetKey = "mock_augmentin";
+      } else if (normalizedFn.includes("calpol") || normalizedFn.includes("crocin") || normalizedFn.includes("paracetamol")) {
+        targetKey = "mock_calpol";
+      } else if (normalizedFn.includes("glycomet") || normalizedFn.includes("metformin")) {
+        targetKey = "mock_glycomet";
+      } else {
+        // Look up file name parts inside the generic database
+        for (const med of genericsDatabase) {
+          const namePart = med.brandName.toLowerCase().split(" ")[0];
+          if (normalizedFn.includes(namePart)) {
+            const ingredients = med.salts.map(s => {
+              const parts = s.split(" ");
+              return { name: parts[0], strength: parts[1] || "" };
+            });
+
+            return NextResponse.json({
+              scannedMedicine: {
+                brandName: med.brandName,
+                activeIngredients: ingredients,
+                manufacturer: "Generic Alternate India",
+                category: med.category,
+              },
+              genericAlternative: {
+                brandName: med.brandName,
+                salts: med.salts,
+                genericName: med.genericName,
+                brandPrice: med.brandPrice,
+                genericPrice: med.genericPrice,
+                quantityText: med.quantityText,
+                category: med.category
+              },
+              safetyExplanation: generateGenericSafetyExplanation(med),
+              isSimulatedScan: true
+            });
+          }
+        }
+      }
+    }
+
+    // Default fallback if no filename match is found
+    if (!targetKey) {
+      // Pick a random template but mark that it was simulated
       const keys = ["mock_augmentin", "mock_calpol", "mock_glycomet"];
       targetKey = keys[Math.floor(Math.random() * keys.length)];
     }
@@ -252,7 +298,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Medicine data not found" }, { status: 404 });
     }
 
-    return NextResponse.json(mockResult);
+    // Return mock data, flagging it as simulated if it wasn't a direct mock selection
+    return NextResponse.json({
+      ...mockResult,
+      isSimulatedScan: !image.startsWith("mock_")
+    });
 
   } catch (error: any) {
     console.error("Analysis mock route error:", error);
