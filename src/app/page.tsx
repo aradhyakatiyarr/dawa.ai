@@ -818,7 +818,7 @@ export default function Home() {
             <div className="bg-emerald-600 text-white p-1.5 rounded-lg">
               <Pill className="w-5.5 h-5.5" />
             </div>
-            <span className="text-xl font-extrabold tracking-tight text-slate-900">Dawa<span className="text-emerald-600 font-black">AI</span></span>
+            <span className="text-xl font-extrabold tracking-tight text-slate-900">Nirog<span className="text-emerald-600 font-black">AI</span></span>
           </div>
           
           <div className="flex items-center h-full gap-4">
@@ -1460,7 +1460,7 @@ export default function Home() {
           <div className="text-xs">
             <p className="font-bold">Medical Information Disclaimer</p>
             <p className="mt-0.5 leading-relaxed text-yellow-900">
-              DawaAI is designed for consumer awareness, pricing comparison, and health literacy only. It **does not** provide medical advice, diagnosis, or treatment. Always consult a certified physician or pharmacist before substituting any medication. Do not stop prescribed treatment without medical consent.
+              NirogAI is designed for consumer awareness, pricing comparison, and health literacy only. It **does not** provide medical advice, diagnosis, or treatment. Always consult a certified physician or pharmacist before substituting any medication. Do not stop prescribed treatment without medical consent.
             </p>
           </div>
         </div>
@@ -1469,7 +1469,7 @@ export default function Home() {
       {/* FOOTER */}
       <footer className="bg-slate-900 text-slate-400 py-6 border-t border-slate-200/80 text-xs mt-6">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="font-semibold text-slate-500">© 2026 DawaAI. Built for PM Bhartiya Janaushadhi Awareness Campaign.</p>
+          <p className="font-semibold text-slate-500">© 2026 NirogAI. Built for PM Bhartiya Janaushadhi Awareness Campaign.</p>
           <div className="flex gap-4">
             <a href="https://janaushadhi.gov.in" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition font-bold">Official Govt Portal</a>
             <span className="text-slate-300">|</span>
@@ -1491,7 +1491,7 @@ export default function Home() {
 
             <div className="p-6">
               <h3 className="text-xl font-bold text-slate-800">
-                {authMode === "login" ? "Sign In to DawaAI" : "Create DawaAI Account"}
+                {authMode === "login" ? "Sign In to NirogAI" : "Create NirogAI Account"}
               </h3>
               <p className="text-xs text-slate-400 mt-1">
                 {authMode === "login" ? "Welcome back! Login to save history logs" : "Register a free account to track your generic medicine savings"}

@@ -1,18 +1,18 @@
-# DawaAI 💊
+# NirogAI 💊
 
-**DawaAI** is a production-grade, end-to-end web application built to reduce out-of-pocket healthcare expenses for Indian citizens. By scanning or uploading a brand-name medicine packaging photo, DawaAI automatically identifies the active chemical ingredients (salts), matches them against official government-subsidized generic equivalents (saving up to 90% of costs), provides patient safety instructions in multiple regional languages (English, Hindi, Tamil, Telugu), and displays an interactive map of nearby government-certified generic pharmacies (**Jan Aushadhi Kendras**).
+**NirogAI** is a production-grade, end-to-end web application built to reduce out-of-pocket healthcare expenses for Indian citizens. By scanning or uploading a brand-name medicine packaging photo or typing a medicine name, NirogAI automatically identifies the active chemical ingredients (salts), matches them against official government-subsidized generic equivalents (saving up to 90% of costs), provides patient safety instructions in multiple regional languages (English, Hindi, Tamil, Telugu), and displays an interactive map of nearby government-certified generic pharmacies (**Jan Aushadhi Kendras**).
 
 ## 🚀 Key Features
 
 * **Medicine Packaging Scanner:** Upload any medicine strip or bottle image. The app automatically matches ingredients against the generic equivalents.
+* **Direct Medicine Search:** Type equivalent brand medicine names (e.g. Calpol, Augmentin, Pan-40) to instantly search generic substitutions and pricing comparisons.
 * **Instant Savings Calculator:** Compares estimated brand prices with capped generic rates, highlighting percentage savings (typically 80-90% reductions).
 * **Multilingual AI Safety Explainer:** Explains medicine purpose, standard dosage, side effects, and warning alerts in four major languages: **English, Hindi (हिंदी), Tamil (தமிழ்), and Telugu (తెలుగు)**.
 * **Audio Voice Guides:** Built-in Text-To-Speech (TTS) synthesizer that reads safety warnings aloud in regional Indian accents—assisting elderly or visually impaired users.
-* **Jan Aushadhi Store Locator:** Interactive Leaflet maps centering on your city or current geolocated coordinates, pinning nearby pharmacies with directions and phone numbers.
-* **Searchable Scan History:** Logged-in users have their scan results saved to a secure SQL database history. You can search, delete, or click scan cards to reload details instantly.
+* **Jan Aushadhi Store Locator:** Interactive maps centering on your city or current geolocated coordinates, pinning nearby pharmacies with directions and phone numbers.
+* **Secure Scan History Pop-up:** Logged-in users can access their scan records securely inside the profile icon menu on the header.
 * **User Profile & Settings:** Allows users to modify details (names, emails) and change passwords securely.
-* **Admin Dashboard Console:** System administration panel to monitor users, count total platform scans, calculate cumulative platform savings, update roles, and manage users.
-* **Interactive Demo Mode:** Built-in sample buttons (Augmentin 625, Calpol 650, Glycomet GP 1) that bypass key requirements so judges can test all components immediately with 0 configurations.
+* **Admin Dashboard Console:** System administration panel to monitor users, count total scans, calculate cumulative savings, update roles, and manage users.
 
 ---
 
@@ -35,14 +35,14 @@ Ensure you have [Node.js](https://nodejs.org/) (v18+ recommended) and `npm` inst
 ### 2. Clone the Repository & Install Dependencies
 ```bash
 # Go to the project root directory
-cd dawa-ai
+cd nirog-ai
 
 # Install packages
 npm install
 ```
 
 ### 3. Setup the Database
-DawaAI uses a zero-configuration SQLite database locally. Run the following command to create the schema and generate the Prisma Client:
+NirogAI uses a zero-configuration SQLite database locally. Run the following command to create the schema and generate the Prisma Client:
 ```bash
 npx prisma db push
 ```
@@ -58,7 +58,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 🚀 Deployment to Vercel
 
-To deploy DawaAI to production in under a minute:
+To deploy NirogAI to production in under a minute:
 
 1. Push your code to a GitHub repository:
    ```bash
@@ -73,4 +73,4 @@ To deploy DawaAI to production in under a minute:
 ---
 
 ## 🛡️ Medical Disclaimer
-DawaAI is designed for consumer awareness, pricing comparison, and health literacy only. It **does not** provide medical advice, diagnosis, or treatment. Always consult a certified physician or pharmacist before substituting any medication. Do not stop prescribed treatment without explicit medical consent.
+NirogAI is designed for consumer awareness, pricing comparison, and health literacy only. It **does not** provide medical advice, diagnosis, or treatment. Always consult a certified physician or pharmacist before substituting any medication. Do not stop prescribed treatment without explicit medical consent.
