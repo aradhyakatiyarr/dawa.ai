@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DawaAI 💊
 
-## Getting Started
+**DawaAI** is a production-grade, end-to-end web application built to reduce out-of-pocket healthcare expenses for Indian citizens. By scanning or uploading a brand-name medicine packaging photo, DawaAI automatically identifies the active chemical ingredients (salts), matches them against official government-subsidized generic equivalents (saving up to 90% of costs), provides patient safety instructions in multiple regional languages (English, Hindi, Tamil, Telugu), and displays an interactive map of nearby government-certified generic pharmacies (**Jan Aushadhi Kendras**).
 
-First, run the development server:
+## 🚀 Key Features
 
+* **Medicine Packaging Scanner:** Upload any medicine strip or bottle image. The app automatically matches ingredients against the generic equivalents.
+* **Instant Savings Calculator:** Compares estimated brand prices with capped generic rates, highlighting percentage savings (typically 80-90% reductions).
+* **Multilingual AI Safety Explainer:** Explains medicine purpose, standard dosage, side effects, and warning alerts in four major languages: **English, Hindi (हिंदी), Tamil (தமிழ்), and Telugu (తెలుగు)**.
+* **Audio Voice Guides:** Built-in Text-To-Speech (TTS) synthesizer that reads safety warnings aloud in regional Indian accents—assisting elderly or visually impaired users.
+* **Jan Aushadhi Store Locator:** Interactive Leaflet maps centering on your city or current geolocated coordinates, pinning nearby pharmacies with directions and phone numbers.
+* **Searchable Scan History:** Logged-in users have their scan results saved to a secure SQL database history. You can search, delete, or click scan cards to reload details instantly.
+* **User Profile & Settings:** Allows users to modify details (names, emails) and change passwords securely.
+* **Admin Dashboard Console:** System administration panel to monitor users, count total platform scans, calculate cumulative platform savings, update roles, and manage users.
+* **Interactive Demo Mode:** Built-in sample buttons (Augmentin 625, Calpol 650, Glycomet GP 1) that bypass key requirements so judges can test all components immediately with 0 configurations.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Frontend:** Next.js (App Router), React, Tailwind CSS, Lucide React (Icons).
+* **Database & ORM:** SQLite database connected via Prisma ORM (Version 6).
+* **Authentication:** Secure stateless JSON Web Token (JWT) session cookies.
+* **Geo-Mapping:** Leaflet & `react-leaflet`.
+
+---
+
+## 💻 Getting Started (Local Development)
+
+Follow these steps to run the application locally on your machine:
+
+### 1. Prerequisites
+Ensure you have [Node.js](https://nodejs.org/) (v18+ recommended) and `npm` installed.
+
+### 2. Clone the Repository & Install Dependencies
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Go to the project root directory
+cd dawa-ai
+
+# Install packages
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Setup the Database
+DawaAI uses a zero-configuration SQLite database locally. Run the following command to create the schema and generate the Prisma Client:
+```bash
+npx prisma db push
+```
+This automatically creates a local database file `prisma/dev.db` and generates TypeScript bindings.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Run the Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🚀 Deployment to Vercel
 
-To learn more about Next.js, take a look at the following resources:
+To deploy DawaAI to production in under a minute:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Push your code to a GitHub repository:
+   ```bash
+   git remote add origin <YOUR_GITHUB_REPO_URL>
+   git branch -M main
+   git push -u origin main
+   ```
+2. Log in to [Vercel](https://vercel.com/) and import your repository.
+3. Vercel will automatically detect the **Next.js** framework and configure build presets.
+4. Click **Deploy**. Vercel will build and launch your application!
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🛡️ Medical Disclaimer
+DawaAI is designed for consumer awareness, pricing comparison, and health literacy only. It **does not** provide medical advice, diagnosis, or treatment. Always consult a certified physician or pharmacist before substituting any medication. Do not stop prescribed treatment without explicit medical consent.
