@@ -61,6 +61,8 @@ export default function Home() {
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   
   // Auth Form Fields
   const [authName, setAuthName] = useState("");
@@ -332,7 +334,7 @@ export default function Home() {
         setGeoStores(mockNearby);
         setLocating(false);
         setActiveTab("map");
-        triggerToast("Location calibrated - displaying nearest stores!");
+        triggerToast("Location updated!");
       },
       (error) => {
         console.error("Error fetching location:", error);
@@ -810,70 +812,69 @@ export default function Home() {
       />
 
       {/* Navbar Banner */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 text-slate-800 py-3.5 px-4 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-emerald-600 text-white p-2 rounded-xl shadow-sm">
-              <Pill className="w-6 h-6" />
+      <header className="bg-white border-b border-slate-200 text-slate-800 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 cursor-pointer animate-fade-in" onClick={() => setActiveTab("scan")}>
+            <div className="bg-emerald-600 text-white p-1.5 rounded-lg">
+              <Pill className="w-5.5 h-5.5" />
             </div>
-            <div>
-              <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none">DawaAI</h1>
-              <p className="text-slate-400 text-[10px] sm:text-xs font-semibold mt-1">Generic Medicine Savings Assistant</p>
-            </div>
+            <span className="text-xl font-extrabold tracking-tight text-slate-900">Dawa<span className="text-emerald-600 font-black">AI</span></span>
           </div>
           
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <button
-              onClick={() => setActiveTab("scan")}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
-                activeTab === "scan" 
-                  ? "bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold shadow-sm" 
-                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100/80 border border-transparent font-semibold"
-              }`}
-            >
-              💊 Scanner
-            </button>
-            <button
-              onClick={() => setActiveTab("map")}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
-                activeTab === "map" 
-                  ? "bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold shadow-sm" 
-                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100/80 border border-transparent font-semibold"
-              }`}
-            >
-              📍 Locator
-            </button>
-
-            {user?.role === "ADMIN" && (
+          <div className="flex items-center h-full gap-4">
+            <nav className="flex h-full items-center gap-1 sm:gap-2">
               <button
-                onClick={() => { setActiveTab("admin"); loadAdminData(); }}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
-                  activeTab === "admin" 
-                    ? "bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold shadow-sm" 
-                    : "text-slate-600 hover:text-slate-950 hover:bg-slate-100/80 border border-transparent font-semibold"
+                onClick={() => setActiveTab("scan")}
+                className={`h-16 flex items-center gap-1.5 px-3 border-b-2 text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                  activeTab === "scan" 
+                    ? "border-emerald-600 text-emerald-600" 
+                    : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-200"
                 }`}
               >
-                ⚙️ Admin
+                Scanner
               </button>
-            )}
+              <button
+                onClick={() => setActiveTab("map")}
+                className={`h-16 flex items-center gap-1.5 px-3 border-b-2 text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                  activeTab === "map" 
+                    ? "border-emerald-600 text-emerald-600" 
+                    : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-200"
+                }`}
+              >
+                Locator
+              </button>
+
+              {user?.role === "ADMIN" && (
+                <button
+                  onClick={() => { setActiveTab("admin"); loadAdminData(); }}
+                  className={`h-16 flex items-center gap-1.5 px-3 border-b-2 text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                    activeTab === "admin" 
+                      ? "border-emerald-600 text-emerald-600" 
+                      : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-200"
+                  }`}
+                >
+                  Admin
+                </button>
+              )}
+            </nav>
 
             {/* Auth Button/Dropdown */}
-            <div className="relative ml-1 sm:ml-2" ref={dropdownRef}>
+            <div className="relative" ref={dropdownRef}>
               {authLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
               ) : user ? (
                 <button
                   onClick={() => setShowUserDropdown(!showUserDropdown)}
-                  className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100/50 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-sm focus:outline-none transition cursor-pointer"
+                  className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100/50 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold shadow-sm focus:outline-none transition cursor-pointer"
                 >
-                  <User className="w-4 h-4" />
+                  <User className="w-4 h-4 text-slate-400" />
                   <span className="max-w-[70px] truncate hidden md:inline">{user.name}</span>
-                  <ChevronDown className="w-3.5 h-3.5" />
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
                 </button>
               ) : (
                 <button
                   onClick={() => { setAuthMode("login"); setShowAuthModal(true); }}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow transition cursor-pointer"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-bold shadow transition cursor-pointer"
                 >
                   Sign In
                 </button>
@@ -893,6 +894,14 @@ export default function Home() {
                   >
                     <Settings className="w-3.5 h-3.5 text-slate-400" />
                     <span>Profile Settings</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setShowHistoryModal(true); setShowUserDropdown(false); }}
+                    className="w-full text-left px-4 py-2 text-xs hover:bg-slate-50 flex items-center gap-2 transition font-bold"
+                  >
+                    <BarChart3 className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Scan History</span>
                   </button>
 
                   <button
@@ -1380,101 +1389,7 @@ export default function Home() {
         {/* RIGHT SIDE PANEL */}
         <div className="flex flex-col gap-6">
           
-          {/* User History sidebar widget */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col gap-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                <BarChart3 className="text-emerald-600 w-5 h-5" />
-                Scan History
-              </h3>
-              {user && history.length > 0 && (
-                <button
-                  onClick={handleClearAllHistory}
-                  className="text-rose-600 hover:text-rose-700 text-xs font-semibold hover:underline"
-                >
-                  Clear All
-                </button>
-              )}
-            </div>
 
-            {user ? (
-              <>
-                {/* History Search */}
-                <div className="relative border border-slate-200 rounded-lg flex items-center px-2 bg-slate-50 focus-within:ring-2 focus-within:ring-emerald-500 focus-within:bg-white transition-all">
-                  <Search className="w-4 h-4 text-slate-400" />
-                  <input
-                    type="text"
-                    value={historySearch}
-                    onChange={(e) => setHistorySearch(e.target.value)}
-                    placeholder="Search history..."
-                    className="w-full text-xs bg-transparent py-2 px-1 focus:outline-none text-slate-700"
-                  />
-                  {historySearch && (
-                    <button onClick={() => setHistorySearch("")}>
-                      <X className="w-3.5 h-3.5 text-slate-400 hover:text-slate-600" />
-                    </button>
-                  )}
-                </div>
-
-                {/* History Items list */}
-                {history.length === 0 ? (
-                  <div className="text-center py-8 text-slate-400 text-xs leading-relaxed">
-                    {historySearch ? "No matching records found." : "No scans yet. Start scanning medicines!"}
-                  </div>
-                ) : (
-                  <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-                    {history.map((scan) => (
-                      <div
-                        key={scan.id}
-                        onClick={() => handleSelectHistoryItem(scan)}
-                        className="bg-slate-50 border border-slate-200 hover:border-emerald-200 p-3 rounded-xl cursor-pointer hover:bg-emerald-50/10 transition-all flex items-start justify-between gap-2"
-                      >
-                        <div className="min-w-0">
-                          <h4 className="font-bold text-slate-800 text-xs truncate">{scan.brandName}</h4>
-                          <p className="text-[10px] text-slate-400 mt-0.5 truncate">
-                            {scan.genericName ? "Generic Match ✓" : "Salts Identified"}
-                          </p>
-                          <p className="text-[9px] text-slate-400 mt-1">
-                            {new Date(scan.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="flex flex-col items-end gap-1.5">
-                          {scan.savingsPercent ? (
-                            <span className="bg-emerald-100 text-emerald-800 text-[9px] font-black px-1.5 py-0.5 rounded-full">
-                              -{scan.savingsPercent}%
-                            </span>
-                          ) : (
-                            <span className="bg-slate-200 text-slate-700 text-[9px] font-semibold px-1.5 py-0.5 rounded-full">
-                              info
-                            </span>
-                          )}
-                          <button
-                            onClick={(e) => handleDeleteHistory(e, scan.id)}
-                            className="text-slate-400 hover:text-rose-600 transition"
-                            title="Delete record"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="bg-slate-50 border border-slate-200 border-dashed rounded-xl p-6 text-center text-xs text-slate-500 leading-relaxed">
-                <Info className="w-5 h-5 text-slate-400 mx-auto mb-2" />
-                <p className="font-bold text-slate-700 mb-1">Track Your Savings</p>
-                <p className="mb-4 text-slate-400">Create a free account to save scan logs, calculate cumulative savings, and view your prescription history.</p>
-                <button
-                  onClick={() => { setAuthMode("signup"); setShowAuthModal(true); }}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition w-full"
-                >
-                  Create Account
-                </button>
-              </div>
-            )}
-          </div>
 
           {/* Near Me Locations widget */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col gap-4">
@@ -1493,7 +1408,7 @@ export default function Home() {
               className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 py-3 rounded-xl font-bold text-sm shadow-sm transition flex items-center justify-center gap-2 w-full"
             >
               {locating ? <Loader2 className="w-4 h-4 animate-spin text-emerald-600" /> : <MapPin className="w-4.5 h-4.5 text-emerald-600" />}
-              <span>{userLocation ? "Location Calibrated ✓" : "Detect Current Location"}</span>
+              <span>{userLocation ? "Location Set ✓" : "Detect Current Location"}</span>
             </button>
 
             {/* List of Nearest Stores */}
@@ -1558,7 +1473,7 @@ export default function Home() {
           <div className="flex gap-4">
             <a href="https://janaushadhi.gov.in" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition font-bold">Official Govt Portal</a>
             <span className="text-slate-300">|</span>
-            <a href="#" className="hover:text-emerald-600 transition font-bold">Terms of Use</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setShowTermsModal(true); }} className="hover:text-emerald-600 transition font-bold">Terms & Privacy</a>
           </div>
         </div>
       </footer>
@@ -1757,6 +1672,151 @@ export default function Home() {
                   <span>Save Changes</span>
                 </button>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SCAN HISTORY OVERLAY MODAL */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-[999] backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden relative border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <button 
+              onClick={() => setShowHistoryModal(false)}
+              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="p-6">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <BarChart3 className="text-emerald-600 w-5 h-5" />
+                  Your Scan History
+                </h3>
+                {user && history.length > 0 && (
+                  <button
+                    onClick={handleClearAllHistory}
+                    className="text-rose-600 hover:text-rose-700 text-xs font-semibold hover:underline cursor-pointer"
+                  >
+                    Clear All History
+                  </button>
+                )}
+              </div>
+
+              <div className="mt-4 flex flex-col gap-4">
+                {/* Search Bar inside Modal */}
+                <div className="relative border border-slate-200 rounded-lg flex items-center px-2 bg-slate-50 focus-within:ring-2 focus-within:ring-emerald-500 focus-within:bg-white transition-all">
+                  <Search className="w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    value={historySearch}
+                    onChange={(e) => setHistorySearch(e.target.value)}
+                    placeholder="Search past scans..."
+                    className="w-full text-xs bg-transparent py-2.5 px-2 focus:outline-none text-slate-700 font-semibold"
+                  />
+                  {historySearch && (
+                    <button onClick={() => setHistorySearch("")}>
+                      <X className="w-3.5 h-3.5 text-slate-400 hover:text-slate-600" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Scans List */}
+                {history.length === 0 ? (
+                  <div className="text-center py-12 text-slate-400 text-xs leading-relaxed">
+                    {historySearch ? "No matching records found." : "No scans recorded yet. Go search or scan a brand name!"}
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
+                    {history.map((scan) => (
+                      <div
+                        key={scan.id}
+                        onClick={() => {
+                          handleSelectHistoryItem(scan);
+                          setShowHistoryModal(false);
+                        }}
+                        className="bg-slate-50 border border-slate-200 hover:border-emerald-200 hover:bg-emerald-50/5 p-3 rounded-xl cursor-pointer transition-all flex items-start justify-between gap-2"
+                      >
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-slate-800 text-xs truncate">{scan.brandName}</h4>
+                          <p className="text-[10px] text-slate-500 mt-0.5 truncate">
+                            {scan.genericName ? "Generic Match ✓" : "Salts Mapped"}
+                          </p>
+                          <p className="text-[9px] text-slate-400 mt-1">
+                            {new Date(scan.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          {scan.savingsPercent ? (
+                            <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full">
+                              -{scan.savingsPercent}%
+                            </span>
+                          ) : (
+                            <span className="bg-slate-200 text-slate-700 text-[9px] font-semibold px-1.5 py-0.5 rounded-full">
+                              info
+                            </span>
+                          )}
+                          <button
+                            onClick={(e) => handleDeleteHistory(e, scan.id)}
+                            className="text-slate-400 hover:text-rose-600 transition cursor-pointer"
+                            title="Delete record"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TERMS AND CONDITIONS MODAL */}
+      {showTermsModal && (
+        <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-[999] backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden relative border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <button 
+              onClick={() => setShowTermsModal(false)}
+              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-slate-800 border-b border-slate-100 pb-3">Terms & Privacy Policy</h3>
+              
+              <div className="space-y-4 mt-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                <div>
+                  <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider mb-1">1. Educational Purpose Only</h4>
+                  <p>DawaAI compiles official pricing information and salt composition. It does not provide medical advice or prescriptions. Always verify medication details with a certified physician.</p>
+                </div>
+
+                <div>
+                  <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider mb-1">2. Local-First Privacy</h4>
+                  <p>Your account, scan history, and user profile are saved 100% locally in your own browser's storage (<code className="bg-slate-100 px-1 py-0.5 rounded text-xs font-mono">localStorage</code>) and are never shared or uploaded to external servers.</p>
+                </div>
+
+                <div>
+                  <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider mb-1">3. Capped Pricing Accuracy</h4>
+                  <p>Generic price estimates are mapped from the official PM Bhartiya Janaushadhi database catalog. Actual store availability and price caps might fluctuate.</p>
+                </div>
+
+                <div className="bg-emerald-50 border border-emerald-100 p-3.5 rounded-xl text-emerald-800 text-xs font-medium flex items-start gap-2">
+                  <Check className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-600" />
+                  <span>By using DawaAI, you understand that this is an information portal supporting the national Jan Aushadhi awareness campaign.</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowTermsModal(false)}
+                className="w-full bg-slate-800 hover:bg-slate-900 text-white py-2.5 rounded-lg font-bold text-sm shadow-md transition mt-6 cursor-pointer"
+              >
+                I Understand
+              </button>
             </div>
           </div>
         </div>
