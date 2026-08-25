@@ -10,6 +10,7 @@ import {
   ChevronDown, UserCheck, BarChart3, X, Check
 } from "lucide-react";
 import { PharmacyStore, storesDatabase } from "@/data/stores";
+import { genericsDatabase } from "@/data/generics";
 
 // Dynamically import Leaflet Map to avoid SSR errors
 const MapComponent = dynamic(() => import("@/components/MapComponent"), { ssr: false });
@@ -63,6 +64,9 @@ export default function Home() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [showVerifyMedicineModal, setShowVerifyMedicineModal] = useState(false);
+  const [selectedBrandName, setSelectedBrandName] = useState("");
   
   // Auth Form Fields
   const [authName, setAuthName] = useState("");
@@ -358,8 +362,22 @@ export default function Home() {
         const compressed = await compressImage(rawBase64);
         setImage(compressed);
         
-        // Analyze image
-        await analyzeMedicine(compressed, file.name);
+        // Store base64 data and trigger confirmation popup for mock mapping precision
+        setPendingImage(compressed);
+        
+        // Try pre-selecting brand name by checking filename
+        let matchName = "";
+        const normalizedFn = file.name.toLowerCase();
+        for (const med of genericsDatabase) {
+          const namePart = med.brandName.toLowerCase().split(" ")[0];
+          if (normalizedFn.includes(namePart)) {
+            matchName = med.brandName;
+            break;
+          }
+        }
+        setSelectedBrandName(matchName);
+        setAnalyzing(false);
+        setShowVerifyMedicineModal(true);
       };
       reader.readAsDataURL(file);
     } catch (err: any) {
@@ -1810,7 +1828,7 @@ export default function Home() {
 
                 <div className="bg-emerald-50 border border-emerald-100 p-3.5 rounded-xl text-emerald-800 text-xs font-medium flex items-start gap-2">
                   <Check className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-600" />
-                  <span>By using DawaAI, you understand that this is an information portal supporting the national Jan Aushadhi awareness campaign.</span>
+                  <span>By using NirogAI, you understand that this is an information portal supporting the national Jan Aushadhi awareness campaign.</span>
                 </div>
               </div>
 
@@ -1819,6 +1837,72 @@ export default function Home() {
                 className="w-full bg-slate-800 hover:bg-slate-900 text-white py-2.5 rounded-lg font-bold text-sm shadow-md transition mt-6 cursor-pointer"
               >
                 I Understand
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MOCK SCAN VERIFICATION MODAL */}
+      {showVerifyMedicineModal && (
+        <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-[999] backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden relative border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <button 
+              onClick={() => {
+                setShowVerifyMedicineModal(false);
+                setPendingImage(null);
+              }}
+              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="p-6 flex flex-col gap-4">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800">Confirm Scanned Medicine</h3>
+                <p className="text-xs text-slate-400 mt-1">Select the medicine brand name to simulate OCR packaging detection.</p>
+              </div>
+
+              {pendingImage && (
+                <div className="relative aspect-[3/2] w-full rounded-xl overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center shadow-inner">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
+                    src={pendingImage} 
+                    alt="Captured medicine strip preview" 
+                    className="object-contain w-full h-full"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent"></div>
+                  <span className="absolute bottom-3 left-3 text-[10px] text-white font-bold bg-slate-800/80 px-2 py-0.5 rounded backdrop-blur-xs flex items-center gap-1">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Preview Captured
+                  </span>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Brand Name:</label>
+                <select
+                  value={selectedBrandName}
+                  onChange={(e) => setSelectedBrandName(e.target.value)}
+                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 bg-slate-50 focus:bg-white transition-all font-semibold shadow-inner cursor-pointer"
+                >
+                  <option value="">-- Autodetect Generic Salts --</option>
+                  {genericsDatabase.map((med) => (
+                    <option key={med.brandName} value={med.brandName}>
+                      {med.brandName} ({med.category})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                onClick={() => {
+                  setShowVerifyMedicineModal(false);
+                  analyzeMedicine(pendingImage || "", selectedBrandName || "mock_calpol");
+                  setPendingImage(null);
+                }}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
+              >
+                <span>Process & Extract Salts</span>
               </button>
             </div>
           </div>

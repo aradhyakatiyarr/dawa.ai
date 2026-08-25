@@ -152,6 +152,78 @@ export const genericsDatabase: GenericMedicine[] = [
     genericPrice: 80.00,
     quantityText: "15 Tablets",
     category: "Antidiabetic"
+  },
+  {
+    brandName: "Disprin",
+    salts: ["Aspirin 325mg"],
+    genericName: "Aspirin Dispersible Tablets IP 325mg",
+    brandPrice: 15.00,
+    genericPrice: 3.50,
+    quantityText: "10 Tablets",
+    category: "Pain Relief & Blood Thinner"
+  },
+  {
+    brandName: "Saridon",
+    salts: ["Paracetamol 250mg", "Propyphenazone 150mg", "Caffeine 50mg"],
+    genericName: "Paracetamol, Propyphenazone and Caffeine Tablets",
+    brandPrice: 45.00,
+    genericPrice: 12.00,
+    quantityText: "10 Tablets",
+    category: "Pain Relief & Antipyretic"
+  },
+  {
+    brandName: "Combiflam",
+    salts: ["Ibuprofen 400mg", "Paracetamol 325mg"],
+    genericName: "Ibuprofen and Paracetamol Tablets IP",
+    brandPrice: 50.00,
+    genericPrice: 14.00,
+    quantityText: "20 Tablets",
+    category: "Pain Killer & Anti-inflammatory"
+  },
+  {
+    brandName: "Dolo 650",
+    salts: ["Paracetamol 650mg"],
+    genericName: "Paracetamol Tablets IP 650mg",
+    brandPrice: 33.60,
+    genericPrice: 10.10,
+    quantityText: "15 Tablets",
+    category: "Analgesic & Antipyretic"
+  },
+  {
+    brandName: "Vicks Action 500 Duo",
+    salts: ["Paracetamol 500mg", "Phenylephrine 5mg", "Caffeine 30mg"],
+    genericName: "Paracetamol, Phenylephrine Hydrochloride and Caffeine Tablets",
+    brandPrice: 44.00,
+    genericPrice: 11.50,
+    quantityText: "10 Tablets",
+    category: "Cold & Cough Relief"
+  },
+  {
+    brandName: "Avil 25",
+    salts: ["Pheniramine Maleate 25mg"],
+    genericName: "Pheniramine Maleate Tablets IP 25mg",
+    brandPrice: 11.00,
+    genericPrice: 2.20,
+    quantityText: "15 Tablets",
+    category: "Antiallergic"
+  },
+  {
+    brandName: "Becosules Capsules",
+    salts: ["Vitamin B-Complex", "Vitamin C"],
+    genericName: "Vitamin B-Complex with Vitamin C Capsules",
+    brandPrice: 55.00,
+    genericPrice: 15.00,
+    quantityText: "20 Capsules",
+    category: "Multivitamin"
+  },
+  {
+    brandName: "Shelcal 500",
+    salts: ["Calcium 500mg", "Vitamin D3 250IU"],
+    genericName: "Calcium and Vitamin D3 Tablets IP",
+    brandPrice: 144.00,
+    genericPrice: 35.00,
+    quantityText: "15 Tablets",
+    category: "Calcium Supplement"
   }
 ];
 
