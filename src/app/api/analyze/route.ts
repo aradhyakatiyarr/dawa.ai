@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { genericsDatabase, findGenericAlternative } from "@/data/generics";
 
 const MOCK_DATA: Record<string, any> = {
   mock_augmentin: {
@@ -43,7 +44,7 @@ const MOCK_DATA: Record<string, any> = {
         purpose: "ఊపిరితిత్తులు, చెవి, సైనస్, చర్మం మరియు మూత్రనాళ బ్యాక్టీరియా ఇన్ఫెక్షన్ల నివారణకు వాడతారు.",
         howToUse: "కడుపు నొప్పి రాకుండా ఉండటానికి దీనిని ఆహారంతో పాటు తీసుకోండి. టాబ్లెట్ పూర్తిగా మింగండి.",
         sideEffects: "వికారం, వాంతులు, విరేచనాలు, చర్మంపై దద్దుర్లు.",
-        warnings: "పెన్సిలిన్ అలెర్జీ ఉంటే దీనిని వాడకూడదు. కిడ్నీ లేదా లివర్ సమస్యలు ఉంటే డాక్టర్ కి తెలపండి."
+        warnings: "పెన్సిలిన్ అలెర్జీ ఉంటే దీనిని వాడకూడదు. కిడ్నీ లేదా లివర్ समस्या ఉంటే డాక్టర్ కి తెలపండి."
       }
     }
   },
@@ -79,10 +80,10 @@ const MOCK_DATA: Record<string, any> = {
         warnings: "इसे लेते समय शराब के सेवन से बचें। अन्य पेरासิตामोल युक्त दवाओं के साथ न लें।"
       },
       ta: {
-        purpose: "நுரையீரல், காது, சைனஸ், தோல் மற்றும் சிறுநீர் பாதையில் ஏற்படும் பாக்டீரியா தொற்றுகளை குணப்படுத்த பயன்படுகிறது.",
-        howToUse: "வயிற்று உபாதையை குறைக்க உணவோடு சேர்த்து மாத்திரையை உட்கொள்ளவும். மாத்திரையை முழுமையாக விழுங்கவும்.",
-        sideEffects: "வயிற்றுப்போக்கு, குமட்டல், வாந்தி, தோல் தடிப்பு.",
-        warnings: "பென்சிலின் ஒவ்வாமை இருந்தால் உட்கொள்ள வேண்டாம். சிறுநீரக அல்லது கல்லீரல் பாதிப்பு இருப்பின் மருத்துவரிடம் கூறவும்."
+        purpose: "மிதமான மற்றும் கடுமையான காய்ச்சல் மற்றும் உடல் வலி குறைக்க பயன்படுகிறது.",
+        howToUse: "உணவுக்கு பின் உட்கொள்ளவும். ஒரு நாளைக்கு 4 மாத்திரைகளுக்கு மேல் உட்கொள்ளக் கூடாது.",
+        sideEffects: "பரிந்துரைக்கப்பட்ட அளவில் பக்கவிளைவுகள் அரிது. அதிக அளவு கல்லீரல் பாதிப்பை ஏற்படுத்தும்.",
+        warnings: "இந்த மருந்தை உட்கொள்ளும் போது மது அருந்துவதை தவிர்க்கவும். பிற பாராசிட்டமால் மும்மடி தவிர்க்கவும்."
       },
       te: {
         purpose: "తలనొప్పి, ఒళ్లు నొప్పులు ఉపశమనం మరియు జ్వరం తగ్గించడానికి వాడతారు.",
@@ -140,25 +141,108 @@ const MOCK_DATA: Record<string, any> = {
   }
 };
 
+// Generates simulated safety sheets for any generics in the databases
+function generateGenericSafetyExplanation(medicine: any) {
+  const name = medicine.brandName;
+  const category = medicine.category || "therapeutic";
+  
+  return {
+    en: {
+      purpose: `Used to treat and manage ${category.toLowerCase()} conditions as prescribed by doctors.`,
+      howToUse: `Take this medicine in the dose and duration advised by your physician. Swallow it as a whole with water.`,
+      sideEffects: `Common side effects include mild nausea, headaches, dizziness, or temporary stomach upset.`,
+      warnings: `Keep out of reach of children. Consult your doctor if you are pregnant, nursing, or have organ impairments.`
+    },
+    hi: {
+      purpose: `यह डॉक्टर द्वारा निर्धारित ${category} स्थितियों के उपचार और प्रबंधन के लिए उपयोग किया जाता है।`,
+      howToUse: `इस दवा को अपने चिकित्सक द्वारा बताई गई खुराक और अवधि में लें। इसे पानी के साथ पूरा निगल लें।`,
+      sideEffects: `आम दुष्प्रभावों में हल्की मतली, सिरदर्द, चक्कर आना या अस्थायी पेट खराब होना शामिल हैं।`,
+      warnings: `बच्चों की पहुंच से दूर रखें। यदि आप गर्भवती हैं, स्तनपान करा रही हैं, या किडनी/लिवर की समस्या है तो डॉक्टर से सलाह लें।`
+    },
+    ta: {
+      purpose: `மருத்துவர்களால் பரிந்துரைக்கப்படும் ${category} நிலைமைகளுக்கு சிகிச்சையளிக்கப் பயன்படுகிறது.`,
+      howToUse: `இந்த மருந்தை உங்கள் மருத்துவர் அறிவுறுத்திய அளவு மற்றும் காலத்திற்கு எடுத்துக்கொள்ளுங்கள்.`,
+      sideEffects: `பொதுவான பக்கவிளைவுகளில் லேசான குமட்டல், தலைவலி, மயக்கம் அல்லது தற்காலிக வயிற்று உபாதை இருக்கும்.`,
+      warnings: `குழந்தைகளுக்கு எட்டாதவாறு வைக்கவும். கர்ப்பமாக இருந்தால் அல்லது ஏதேனும் உடல் பாதிப்புகள் இருப்பின் மருத்துவரை அணுகவும்.`
+    },
+    te: {
+      purpose: `వైద్యులు సూచించిన విధంగా ${category} పరిస్థితుల చికిత్సకు ఉపయోగించబడుతుంది.`,
+      howToUse: `ఈ మందును మీ వైద్యుడు సూచించిన మోతాదు మరియు వ్యవధిలో తీసుకోండి. దీనిని నీటితో పూర్తిగా మింగండి.`,
+      sideEffects: `సాధారణ దుష్ప్రభావాలలో తేలికపాటి వికారం, తలనొప్పి, మైకము లేదా తాత్కాలిక కడుపు నొప్పి ఉంటాయి.`,
+      warnings: `పిల్లలకు దూరంగా ఉంచండి. గర్భిణీలు లేదా కిడ్నీ/కాలేయ వ్యాధులు ఉన్నవారు డాక్టర్ ని సంప్రదించాలి.`
+    }
+  };
+}
+
 export async function POST(request: Request) {
   try {
-    const { image } = await request.json();
+    const { image, text } = await request.json();
 
-    if (!image) {
-      return NextResponse.json({ error: "Image data is required" }, { status: 400 });
+    // Simulate standard AI API latency (1.2 seconds)
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+
+    // Case 1: Text Search Query
+    if (text && typeof text === "string" && text.trim().length > 0) {
+      const normalized = text.toLowerCase().trim();
+
+      // Check if it matches one of our three core mock entries
+      if (normalized.includes("augmentin") || normalized.includes("amoxicillin") || normalized.includes("clavulan")) {
+        return NextResponse.json(MOCK_DATA.mock_augmentin);
+      }
+      if (normalized.includes("calpol") || normalized.includes("crocin") || normalized.includes("paracetamol")) {
+        return NextResponse.json(MOCK_DATA.mock_calpol);
+      }
+      if (normalized.includes("glycomet") || normalized.includes("metformin")) {
+        return NextResponse.json(MOCK_DATA.mock_glycomet);
+      }
+
+      // Fallback: search in generics database
+      const match = findGenericAlternative(normalized);
+      if (match) {
+        const ingredients = match.salts.map(s => {
+          const parts = s.split(" ");
+          return { name: parts[0], strength: parts[1] || "" };
+        });
+
+        const customPayload = {
+          scannedMedicine: {
+            brandName: match.brandName,
+            activeIngredients: ingredients,
+            manufacturer: "Generic Alternate India",
+            category: match.category,
+          },
+          genericAlternative: {
+            brandName: match.brandName,
+            salts: match.salts,
+            genericName: match.genericName,
+            brandPrice: match.brandPrice,
+            genericPrice: match.genericPrice,
+            quantityText: match.quantityText,
+            category: match.category
+          },
+          safetyExplanation: generateGenericSafetyExplanation(match)
+        };
+        return NextResponse.json(customPayload);
+      }
+
+      // No match found
+      return NextResponse.json(
+        { error: `Could not find a generic alternative for "${text}". Try searching for Calpol, Augmentin, Glycomet, Crocin, Zifi, Telma or Pan-40.` }, 
+        { status: 404 }
+      );
     }
 
-    // Simulate standard AI API latency (1.5 seconds) to make scanner animations look realistic
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Case 2: Image Data Upload
+    if (!image) {
+      return NextResponse.json({ error: "Image data or text query is required" }, { status: 400 });
+    }
 
-    // Resolve which mock data key to serve
     let targetKey = "mock_augmentin"; // Default fallback
 
     if (typeof image === "string" && image.startsWith("mock_")) {
       targetKey = image;
     } else {
-      // For any custom uploads or live snapshots, we mock-analyze by randomly selecting 
-      // one of our three core datasets to ensure a high-fidelity generic match.
+      // For any custom uploads, we mock-analyze by randomly selecting one of our three core datasets.
       const keys = ["mock_augmentin", "mock_calpol", "mock_glycomet"];
       targetKey = keys[Math.floor(Math.random() * keys.length)];
     }

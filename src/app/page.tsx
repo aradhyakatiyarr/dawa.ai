@@ -83,6 +83,7 @@ export default function Home() {
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
+  const [textMedicineName, setTextMedicineName] = useState("");
   
   // File input references
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -401,7 +402,7 @@ export default function Home() {
 
       // Save scan logs locally to localStorage if user logged in
       if (user) {
-        const allScans = JSON.parse(localStorage.getItem("dawa_scans") || "[]");
+        const allScans = JSON.parse(safeGetLocalStorage("dawa_scans", "[]"));
         const newRecord = {
           id: "scan-" + Date.now(),
           userId: user.id,
@@ -418,7 +419,7 @@ export default function Home() {
           createdAt: new Date().toISOString()
         };
         allScans.unshift(newRecord);
-        localStorage.setItem("dawa_scans", JSON.stringify(allScans));
+        safeSetLocalStorage("dawa_scans", JSON.stringify(allScans));
         loadHistory(); // Refresh history sidebar
         triggerToast("Scan saved to your history!");
       }
@@ -427,6 +428,61 @@ export default function Home() {
       console.error(err);
       setError(err.message || "An unexpected error occurred while analyzing the medicine.");
       triggerToast("Analysis failed", "error");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  // Submit text search query for medicine
+  const handleTextSearchSubmit = async () => {
+    if (!textMedicineName.trim()) return;
+    setAnalyzing(true);
+    setError(null);
+    setResult(null);
+    setImage(null); // Clear image when searching by text
+
+    try {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: textMedicineName })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to find generic medicine alternatives");
+      }
+
+      setResult(data);
+      setTextMedicineName(""); // Clear query input on success
+
+      // Save to localStorage scan history
+      if (user) {
+        const allScans = JSON.parse(safeGetLocalStorage("dawa_scans", "[]"));
+        const newRecord = {
+          id: "scan-" + Date.now(),
+          userId: user.id,
+          brandName: data.scannedMedicine.brandName,
+          manufacturer: data.scannedMedicine.manufacturer || "Generic Alternate India",
+          category: data.scannedMedicine.category || "General",
+          activeIngredients: data.scannedMedicine.activeIngredients || [],
+          genericName: data.genericAlternative?.genericName || null,
+          genericPrice: data.genericAlternative?.genericPrice || null,
+          brandPrice: data.genericAlternative?.brandPrice || null,
+          savingsAmount: data.genericAlternative ? (data.genericAlternative.brandPrice - data.genericAlternative.genericPrice) : 0,
+          savingsPercent: data.genericAlternative ? Math.round(((data.genericAlternative.brandPrice - data.genericAlternative.genericPrice) / data.genericAlternative.brandPrice) * 100) : 0,
+          safetyExplanation: data.safetyExplanation,
+          createdAt: new Date().toISOString()
+        };
+        allScans.unshift(newRecord);
+        safeSetLocalStorage("dawa_scans", JSON.stringify(allScans));
+        loadHistory();
+        triggerToast("Search details saved to history!");
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "An unexpected error occurred while searching for the medicine.");
+      triggerToast("Search failed", "error");
     } finally {
       setAnalyzing(false);
     }
@@ -754,35 +810,35 @@ export default function Home() {
       />
 
       {/* Navbar Banner */}
-      <header className="bg-emerald-600 text-white shadow-md py-4 px-4 sticky top-0 z-50">
+      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 text-slate-800 py-3.5 px-4 sticky top-0 z-50 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="bg-white text-emerald-600 p-2 rounded-xl shadow">
-              <Pill className="w-8 h-8" />
+            <div className="bg-emerald-600 text-white p-2 rounded-xl shadow-sm">
+              <Pill className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight leading-none">DawaAI</h1>
-              <p className="text-emerald-100 text-[10px] sm:text-xs mt-1">Generic Medicine savings assistant</p>
+              <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none">DawaAI</h1>
+              <p className="text-slate-400 text-[10px] sm:text-xs font-semibold mt-1">Generic Medicine Savings Assistant</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => setActiveTab("scan")}
-              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all ${
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
                 activeTab === "scan" 
-                  ? "bg-white text-emerald-700 shadow" 
-                  : "hover:bg-emerald-500 text-white"
+                  ? "bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold shadow-sm" 
+                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100/80 border border-transparent font-semibold"
               }`}
             >
               💊 Scanner
             </button>
             <button
               onClick={() => setActiveTab("map")}
-              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all ${
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
                 activeTab === "map" 
-                  ? "bg-white text-emerald-700 shadow" 
-                  : "hover:bg-emerald-500 text-white"
+                  ? "bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold shadow-sm" 
+                  : "text-slate-600 hover:text-slate-950 hover:bg-slate-100/80 border border-transparent font-semibold"
               }`}
             >
               📍 Locator
@@ -791,10 +847,10 @@ export default function Home() {
             {user?.role === "ADMIN" && (
               <button
                 onClick={() => { setActiveTab("admin"); loadAdminData(); }}
-                className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all ${
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
                   activeTab === "admin" 
-                    ? "bg-white text-emerald-700 shadow" 
-                    : "hover:bg-emerald-500 text-white"
+                    ? "bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold shadow-sm" 
+                    : "text-slate-600 hover:text-slate-950 hover:bg-slate-100/80 border border-transparent font-semibold"
                 }`}
               >
                 ⚙️ Admin
@@ -804,20 +860,20 @@ export default function Home() {
             {/* Auth Button/Dropdown */}
             <div className="relative ml-1 sm:ml-2" ref={dropdownRef}>
               {authLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin text-white" />
+                <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
               ) : user ? (
                 <button
                   onClick={() => setShowUserDropdown(!showUserDropdown)}
-                  className="flex items-center gap-1 bg-emerald-700 hover:bg-emerald-800 text-white px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold shadow-inner focus:outline-none"
+                  className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100/50 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-sm focus:outline-none transition cursor-pointer"
                 >
-                  <User className="w-3.5 h-3.5" />
+                  <User className="w-4 h-4" />
                   <span className="max-w-[70px] truncate hidden md:inline">{user.name}</span>
-                  <ChevronDown className="w-3 h-3" />
+                  <ChevronDown className="w-3.5 h-3.5" />
                 </button>
               ) : (
                 <button
                   onClick={() => { setAuthMode("login"); setShowAuthModal(true); }}
-                  className="bg-white hover:bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold shadow-sm transition"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow transition cursor-pointer"
                 >
                   Sign In
                 </button>
@@ -944,42 +1000,31 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* Interactive Demo Shortcuts */}
-                <div className="border-t border-slate-100 pt-5">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Interactive Demo Samples (Click to test instantly):</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {/* Text Medicine Search Input option */}
+                <div className="border-t border-slate-100 pt-5 flex flex-col gap-3">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Or type brand medicine name directly
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={textMedicineName}
+                      onChange={(e) => setTextMedicineName(e.target.value)}
+                      placeholder="e.g. Augmentin, Calpol, Pan-40, Crocin, Telma, Zifi..."
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && textMedicineName.trim() && !analyzing) {
+                          handleTextSearchSubmit();
+                        }
+                      }}
+                      className="flex-1 text-sm border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 bg-slate-50 focus:bg-white transition-all font-semibold shadow-inner"
+                    />
                     <button
-                      onClick={() => loadSample("mock_augmentin")}
-                      disabled={analyzing}
-                      className="bg-emerald-50/50 hover:bg-emerald-100/70 border border-emerald-100 text-emerald-800 p-3 rounded-xl text-left text-xs font-bold transition flex items-center gap-2.5"
+                      onClick={handleTextSearchSubmit}
+                      disabled={analyzing || !textMedicineName.trim()}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-6 py-3 rounded-xl shadow-sm transition-all hover:shadow-md disabled:opacity-50 flex items-center gap-2 cursor-pointer"
                     >
-                      <span>🧪</span>
-                      <div className="truncate">
-                        <p className="font-bold text-slate-800 leading-none">Augmentin 625</p>
-                        <p className="text-[10px] text-slate-500 font-medium mt-1">Antibiotic</p>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => loadSample("mock_calpol")}
-                      disabled={analyzing}
-                      className="bg-emerald-50/50 hover:bg-emerald-100/70 border border-emerald-100 text-emerald-800 p-3 rounded-xl text-left text-xs font-bold transition flex items-center gap-2.5"
-                    >
-                      <span>🧪</span>
-                      <div className="truncate">
-                        <p className="font-bold text-slate-800 leading-none">Calpol 650</p>
-                        <p className="text-[10px] text-slate-500 font-medium mt-1">Fever/Pain Relief</p>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => loadSample("mock_glycomet")}
-                      disabled={analyzing}
-                      className="bg-emerald-50/50 hover:bg-emerald-100/70 border border-emerald-100 text-emerald-800 p-3 rounded-xl text-left text-xs font-bold transition flex items-center gap-2.5"
-                    >
-                      <span>🧪</span>
-                      <div className="truncate">
-                        <p className="font-bold text-slate-800 leading-none">Glycomet GP 1</p>
-                        <p className="text-[10px] text-slate-500 font-medium mt-1">Diabetes Control</p>
-                      </div>
+                      {analyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                      <span>Search</span>
                     </button>
                   </div>
                 </div>
@@ -1329,16 +1374,7 @@ export default function Home() {
             </div>
           )}
 
-          {/* Core medical disclaimer bottom */}
-          <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-xl flex items-start gap-3 shadow-sm">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-yellow-700" />
-            <div className="text-xs">
-              <p className="font-bold">Medical Information Disclaimer</p>
-              <p className="mt-0.5 leading-relaxed">
-                DawaAI is designed for consumer awareness, pricing comparison, and health literacy only. It **does not** provide medical advice, diagnosis, or treatment. Always consult a certified physician or pharmacist before substituting any medication. Do not stop prescribed treatment without medical consent.
-              </p>
-            </div>
-          </div>
+
         </div>
 
         {/* RIGHT SIDE PANEL */}
@@ -1502,14 +1538,27 @@ export default function Home() {
 
       </main>
 
+      {/* Core medical disclaimer bottom, spanning full width above footer */}
+      <div className="max-w-6xl w-full mx-auto px-4 md:px-6 mb-6">
+        <div className="bg-yellow-50/70 border border-yellow-200/80 text-yellow-800 p-4 rounded-xl flex items-start gap-3 shadow-sm">
+          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-yellow-705" />
+          <div className="text-xs">
+            <p className="font-bold">Medical Information Disclaimer</p>
+            <p className="mt-0.5 leading-relaxed text-yellow-900">
+              DawaAI is designed for consumer awareness, pricing comparison, and health literacy only. It **does not** provide medical advice, diagnosis, or treatment. Always consult a certified physician or pharmacist before substituting any medication. Do not stop prescribed treatment without medical consent.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* FOOTER */}
-      <footer className="bg-slate-950 text-slate-500 text-center py-6 border-t border-slate-800 text-xs mt-12">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p>© 2026 DawaAI - Pradhan Mantri Bhartiya Janaushadhi Pariyojana Awareness Campaign.</p>
+      <footer className="bg-slate-900 text-slate-400 py-6 border-t border-slate-200/80 text-xs mt-6">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="font-semibold text-slate-500">© 2026 DawaAI. Built for PM Bhartiya Janaushadhi Awareness Campaign.</p>
           <div className="flex gap-4">
-            <a href="https://janaushadhi.gov.in" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition">Govt Portal</a>
-            <span>•</span>
-            <a href="#" className="hover:text-emerald-500 transition">Terms of Use</a>
+            <a href="https://janaushadhi.gov.in" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition font-bold">Official Govt Portal</a>
+            <span className="text-slate-300">|</span>
+            <a href="#" className="hover:text-emerald-600 transition font-bold">Terms of Use</a>
           </div>
         </div>
       </footer>
